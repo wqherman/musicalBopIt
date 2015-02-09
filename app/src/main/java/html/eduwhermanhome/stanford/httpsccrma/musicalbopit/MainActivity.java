@@ -28,11 +28,17 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private boolean startGame = false;
     //random number generator
     private Random r = new Random();
-    //variables for timing
-    int startTime;
-    int endTime;
-    int currTime;
-    boolean threadStarted = false;
+
+    //booleans used to tell if an action has happened
+    boolean screenTap = false;
+    boolean shaken = false;
+    boolean amplitudeTrigger = false;
+
+    //keeps the last time the accelerometer data was checked
+    long lastUpdate;
+
+    //holds last accelerometer data
+    float lastx, lasty, lastz;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +64,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 long startTime = System.currentTimeMillis();
                 long endTime = startTime + 15000;
                 long waitTime = 2000;
-                int numCommands = 0;
+                long startWait;
+
                 while(System.currentTimeMillis() < endTime) {
-                    //set text of command
+                    //set text of command, must do this on ui thread since its the only one with
+                    //access to the ui elements
                     final int newCommand = r.nextInt(3);
                     runOnUiThread(new Runnable() {
                         @Override
@@ -74,13 +82,62 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             }
                         }
                     });
-                    numCommands += 1;
-                    while(System.currentTimeMillis() < startTime + waitTime*numCommands){}
+                    //wait for 2 seconds for the user to execute the command otherwise shut down the
+                    //thread
+                    startWait = System.currentTimeMillis();
+                    while(System.currentTimeMillis()-startWait < waitTime){
+                        if(newCommand == 0 && screenTap){
+                            screenTap = false;
+                            break;
+                        } else if(newCommand == 0 && shaken){
+                            shaken = false;
+                        } else if(newCommand == 0 && amplitudeTrigger){
+                            amplitudeTrigger = false;
+                        }else if(newCommand == 1 && shaken){
+                            shaken = false;
+                            break;
+                        } else if(newCommand == 1 && screenTap){
+                            screenTap = false;
+                        } else if(newCommand == 1 && amplitudeTrigger){
+                            amplitudeTrigger = false;
+                        } else if(newCommand == 2 && screenTap){
+                            screenTap = false;
+                        } else if(newCommand == 2 && shaken){
+                            shaken = false;
+                        } else if(newCommand == 2 && amplitudeTrigger){
+                            amplitudeTrigger = false;
+                            break;
+                        }
+                    }
+                    //if we've gone longer than the alloted wait time, exit the thread
+                    if(System.currentTimeMillis() - startWait >= waitTime){
+                        startGame = false;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                commands.setText("Loser!");
+                            }
+                        });
+                        return;
+                    }
                 }
+                //game has finished!
+                //set all triggers to false just in case and display done on the screen
+                screenTap = false;
+                shaken = false;
+                amplitudeTrigger = false;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        commands.setText("You Win!");
+                    }
+                });
                 startGame = false;
             }
         };
 
+        //the start button beings running a thread that will generate new commands without locking
+        //up the interface
         startbutt.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -97,6 +154,21 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 return false;
             }
         });
+
+        resample.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    //set a variable to tell our command thread that we pressed the button
+                    screenTap = true;
+
+                    //send faust an indication that we need the effect associated with this to happen
+                } else if(event.getAction() == MotionEvent.ACTION_UP){
+                    //probably do nothing, or tell faust to start the decay envelope of our effect
+                }
+                return false;
+            }
+        });
     }
 
 
@@ -105,11 +177,28 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
-
+        int shakenThreshold = 500;
         if(mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
+
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastUpdate > 100) {
+                long diffTime = currentTime - lastUpdate;
+                lastUpdate = currentTime;
+                //calculate total speed of device as total change in acceleration
+                float speed = Math.abs(x + y + z - lastx - lasty - lastz)/diffTime * 10000;
+
+                if(speed > shakenThreshold){
+                    shaken = true;
+                }
+
+                //set previous values
+                lastx = x;
+                lasty = y;
+                lastz = z;
+            }
         }
     }
     //what happens when precision of sensor is changed
