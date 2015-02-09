@@ -19,6 +19,9 @@ import android.view.View.OnTouchListener;
 import java.util.Calendar;
 import java.util.Random;
 
+//our faust library
+import com.grame.dsp_faust.dsp_faust;
+
 public class MainActivity extends ActionBarActivity implements SensorEventListener{
 
     //classes to control the sensor manager and accelerometer
