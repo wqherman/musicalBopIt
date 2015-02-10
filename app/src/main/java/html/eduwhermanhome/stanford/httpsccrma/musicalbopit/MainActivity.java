@@ -14,8 +14,9 @@ import android.widget.TextView;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.View.OnTouchListener;
-
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -53,6 +54,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         //register a listener for out accelerometer
         senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+
+        // Audio engine is started and audio process launched
+        int samplingRate = 44100;
+        int bufferLength = 512;
+        dsp_faust.init(samplingRate,bufferLength);
+        dsp_faust.start();
 
         //Get elements from the UI that we'll need to change
         final Button startbutt = (Button) this.findViewById(R.id.startbutton);
@@ -109,6 +116,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             shaken = false;
                         } else if(newCommand == 2 && amplitudeTrigger){
                             amplitudeTrigger = false;
+                            //dsp_faust.setParam("/bopIt/ampButton", 0f);
                             break;
                         }
                     }
@@ -202,6 +210,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 lasty = y;
                 lastz = z;
             }
+
+            //accelerometer is changed most frequently so we'll poll our faust envelope tracker here
+            float ampl = dsp_faust.getParam("/bopIt/amp");
+            if(ampl > 0.6){
+                amplitudeTrigger = true;
+                //dsp_faust.setParam("/bopIt/ampButton", 1f);
+            }
         }
     }
     //what happens when precision of sensor is changed
@@ -229,6 +244,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        dsp_faust.stop();
     }
 
     @Override

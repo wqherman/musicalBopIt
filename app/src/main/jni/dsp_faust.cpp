@@ -16,7 +16,7 @@
 #include <map>
 #include <string.h>
 #include <stdlib.h>
- 
+
 #ifndef __meta__
 #define __meta__
 
@@ -148,7 +148,7 @@ class UI
 
  ************************************************************************
  ************************************************************************/
- 
+
 /******************************************************************************
 *******************************************************************************
 
@@ -230,7 +230,7 @@ namespace httpdfaust
 {
 
 template <typename C> class jsonui;
- 
+
 class jsonfaustui : public UI, public Meta
 {
 	jsonui<FAUSTFLOAT>* fJSON;
@@ -301,12 +301,12 @@ class PathUI : public UI
 {
 
     protected:
-    
+
         std::vector<std::string> fControlsLevel;
-       
+
     public:
-    
-        std::string buildPath(const std::string& label) 
+
+        std::string buildPath(const std::string& label)
         {
             std::string res = "/";
             for (size_t i = 0; i < fControlsLevel.size(); i++) {
@@ -317,7 +317,7 @@ class PathUI : public UI
             replace(res.begin(), res.end(), ' ', '_');
             return res;
         }
-    
+
 };
 
 #endif
@@ -339,19 +339,19 @@ class JSONUI : public PathUI, public Meta
 {
 
     protected:
-    
+
         std::stringstream fJSON;
         std::stringstream fUI;
         std::stringstream fMeta;
         std::vector<std::pair <std::string, std::string> > fMetaAux;
         std::string fName;
-    
+
         char fCloseUIPar;
         char fCloseMetaPar;
         int fTab;
-    
+
         int fInputs, fOutputs;
-         
+
         void tab(int n, std::ostream& fout)
         {
             fout << '\n';
@@ -359,7 +359,7 @@ class JSONUI : public PathUI, public Meta
                 fout << '\t';
             }
         }
-    
+
         void addMeta(int tab_val, bool quote = true)
         {
             if (fMetaAux.size() > 0) {
@@ -374,27 +374,27 @@ class JSONUI : public PathUI, public Meta
                 fMetaAux.clear();
             }
         }
-        
+
         void init(const std::string& name, int inputs, int outputs)
         {
             fTab = 1;
-            
+
             // Start Meta generation
             tab(fTab, fMeta); fMeta << "\"meta\": [";
             fCloseMetaPar = ' ';
-            
+
             // Start UI generation
             tab(fTab, fUI); fUI << "\"ui\": [";
             fCloseUIPar = ' ';
             fTab += 1;
-            
+
             fName = name;
             fInputs = inputs;
             fOutputs = outputs;
         }
-      
+
      public:
-     
+
         JSONUI(const std::string& name, int inputs, int outputs)
         {
             init(name, inputs, outputs);
@@ -404,11 +404,11 @@ class JSONUI : public PathUI, public Meta
         {
             init("", inputs, outputs);
         }
- 
+
         virtual ~JSONUI() {}
 
         // -- widget's layouts
-    
+
         virtual void openGenericGroup(const char* label, const char* name)
         {
             fControlsLevel.push_back(label);
@@ -427,17 +427,17 @@ class JSONUI : public PathUI, public Meta
         {
             openGenericGroup(label, "tgroup");
         }
-    
+
         virtual void openHorizontalBox(const char* label)
         {
             openGenericGroup(label, "hgroup");
         }
-    
+
         virtual void openVerticalBox(const char* label)
         {
             openGenericGroup(label, "vgroup");
         }
-    
+
         virtual void closeBox()
         {
             fControlsLevel.pop_back();
@@ -447,9 +447,9 @@ class JSONUI : public PathUI, public Meta
             tab(fTab, fUI); fUI << "}";
             fCloseUIPar = ',';
         }
-    
+
         // -- active widgets
-    
+
         virtual void addGenericButton(const char* label, const char* name)
         {
             fUI << fCloseUIPar;
@@ -466,7 +466,7 @@ class JSONUI : public PathUI, public Meta
         {
             addGenericButton(label, "button");
         }
-    
+
         virtual void addCheckButton(const char* label, FAUSTFLOAT* zone)
         {
             addGenericButton(label, "checkbox");
@@ -487,25 +487,25 @@ class JSONUI : public PathUI, public Meta
             tab(fTab, fUI); fUI << "}";
             fCloseUIPar = ',';
         }
-    
+
         virtual void addVerticalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT step)
         {
             addGenericEntry(label, "vslider", init, min, max, step);
         }
-    
+
         virtual void addHorizontalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT step)
         {
             addGenericEntry(label, "hslider", init, min, max, step);
         }
-    
+
         virtual void addNumEntry(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init, FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT step)
         {
             addGenericEntry(label, "nentry", init, min, max, step);
         }
 
         // -- passive widgets
-    
-        virtual void addGenericBargraph(const char* label, const char* name, FAUSTFLOAT min, FAUSTFLOAT max) 
+
+        virtual void addGenericBargraph(const char* label, const char* name, FAUSTFLOAT min, FAUSTFLOAT max)
         {
             fUI << fCloseUIPar;
             tab(fTab, fUI); fUI << "{";
@@ -519,11 +519,11 @@ class JSONUI : public PathUI, public Meta
             fCloseUIPar = ',';
         }
 
-        virtual void addHorizontalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT min, FAUSTFLOAT max) 
+        virtual void addHorizontalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT min, FAUSTFLOAT max)
         {
             addGenericBargraph(label, "hbargraph", min, max);
         }
-    
+
         virtual void addVerticalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT min, FAUSTFLOAT max)
         {
             addGenericBargraph(label, "vbargraph", min, max);
@@ -535,7 +535,7 @@ class JSONUI : public PathUI, public Meta
         {
             fMetaAux.push_back(std::make_pair(key, val));
         }
-    
+
         // Meta interface
         virtual void declare(const char* key, const char* value)
         {
@@ -544,7 +544,7 @@ class JSONUI : public PathUI, public Meta
             tab(fTab, fMeta); fMeta << "{ " << "\"" << key << "\"" << ": " << "\"" << value << "\" }";
             fCloseMetaPar = ',';
         }
-    
+
         inline std::string flatten(const std::string& src)
         {
             std::stringstream dst;
@@ -564,7 +564,7 @@ class JSONUI : public PathUI, public Meta
             }
             return dst.str();
         }
-    
+
         std::string JSON(bool flat = false)
         {
             fTab = 0;
@@ -584,7 +584,7 @@ class JSONUI : public PathUI, public Meta
             tab(fTab, fJSON); fJSON << "}" << std::endl;
             return (flat) ? flatten(fJSON.str()) : fJSON.str();
         }
-    
+
 };
 
 #endif
@@ -606,16 +606,16 @@ class JSONUI : public PathUI, public Meta
 
 class MapUI : public PathUI
 {
-    
+
     protected:
-        
+
         std::map<std::string, FAUSTFLOAT*> fZoneMap;
-           
+
     public:
-        
+
         MapUI() {};
         virtual ~MapUI() {};
-        
+
         // -- widget's layouts
         void openTabBox(const char* label)
         {
@@ -633,13 +633,13 @@ class MapUI : public PathUI
         {
             fControlsLevel.pop_back();
         }
-        
+
         // -- active widgets
         void insertMap(std::string label, FAUSTFLOAT* zone)
         {
             fZoneMap[label] = zone;
         }
-        
+
         void addButton(const char* label, FAUSTFLOAT* zone)
         {
             insertMap(buildPath(label), zone);
@@ -660,7 +660,7 @@ class MapUI : public PathUI
         {
             insertMap(buildPath(label), zone);
         }
-        
+
         // -- passive widgets
         void addHorizontalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT fmin, FAUSTFLOAT fmax)
         {
@@ -670,29 +670,29 @@ class MapUI : public PathUI
         {
             insertMap(buildPath(label), zone);
         }
-        
+
         // -- metadata declarations
         void declare(FAUSTFLOAT* zone, const char* key, const char* val)
         {}
-        
+
         // set/get
         void setValue(const std::string& path, float value)
         {
             *fZoneMap[path] = value;
         }
-        
+
         float getValue(const std::string& path)
         {
             return *fZoneMap[path];
         }
-    
-        // map access 
+
+        // map access
         std::map<std::string, FAUSTFLOAT*>& getMap() { return fZoneMap; }
-        
+
         int getParamsCount() { return fZoneMap.size(); }
-        
-        std::string getParamPath(int index) 
-        { 
+
+        std::string getParamPath(int index)
+        {
             std::map<std::string, FAUSTFLOAT*>::iterator it = fZoneMap.begin();
             while (index-- > 0 && it++ != fZoneMap.end()) {}
             return (*it).first;
@@ -713,12 +713,17 @@ class MapUI : public PathUI
 // address to access this parameter with setParam on the JAVA side
 // - compute is where all the DSP should be carried out
 //**************************************************************
+//-----------------------------------------------------
+//
+// Code generated with Faust 0.9.58 (http://faust.grame.fr)
+//-----------------------------------------------------
 #ifndef FAUSTFLOAT
 #define FAUSTFLOAT float
 #endif
 
 typedef long double quad;
 /* link with  */
+#include <math.h>
 
 #ifndef FAUSTCLASS
 #define FAUSTCLASS mydsp
@@ -726,16 +731,59 @@ typedef long double quad;
 
 class mydsp : public dsp {
   private:
+	int 	iConst0;
+	float 	fConst1;
+	float 	fConst2;
+	float 	fConst3;
+	float 	fRec1[2];
+	float 	fConst4;
+	float 	fRec0[2];
+	FAUSTFLOAT 	fbargraph0;
+	FAUSTFLOAT 	fslider0;
   public:
 	static void metadata(Meta* m) 	{
+		m->declare("music.lib/name", "Music Library");
+		m->declare("music.lib/author", "GRAME");
+		m->declare("music.lib/copyright", "GRAME");
+		m->declare("music.lib/version", "1.0");
+		m->declare("music.lib/license", "LGPL with exception");
+		m->declare("math.lib/name", "Math Library");
+		m->declare("math.lib/author", "GRAME");
+		m->declare("math.lib/copyright", "GRAME");
+		m->declare("math.lib/version", "1.0");
+		m->declare("math.lib/license", "LGPL with exception");
+		m->declare("filter.lib/reference", "https://ccrma.stanford.edu/~jos/filters/");
+		m->declare("filter.lib/name", "Faust Filter Library");
+		m->declare("filter.lib/author", "Julius O. Smith (jos at ccrma.stanford.edu)");
+		m->declare("filter.lib/copyright", "Julius O. Smith III");
+		m->declare("filter.lib/version", "1.29");
+		m->declare("filter.lib/license", "STK-4.3");
+		m->declare("effect.lib/name", "Faust Audio Effect Library");
+		m->declare("effect.lib/author", "Julius O. Smith (jos at ccrma.stanford.edu)");
+		m->declare("effect.lib/copyright", "Julius O. Smith III");
+		m->declare("effect.lib/version", "1.33");
+		m->declare("effect.lib/license", "STK-4.3");
+		m->declare("oscillator.lib/name", "Faust Oscillator Library");
+		m->declare("oscillator.lib/author", "Julius O. Smith (jos at ccrma.stanford.edu)");
+		m->declare("oscillator.lib/copyright", "Julius O. Smith III");
+		m->declare("oscillator.lib/version", "1.11");
+		m->declare("oscillator.lib/license", "STK-4.3");
 	}
 
-	virtual int getNumInputs() 	{ return 1; }
+	virtual int getNumInputs() 	{ return 2; }
 	virtual int getNumOutputs() 	{ return 1; }
 	static void classInit(int samplingFreq) {
 	}
 	virtual void instanceInit(int samplingFreq) {
 		fSamplingFreq = samplingFreq;
+		iConst0 = min(192000, max(1, fSamplingFreq));
+		fConst1 = expf((0 - (1e+03f / float(iConst0))));
+		fConst2 = expf((0 - (16.666666666666668f / float(iConst0))));
+		fConst3 = (1.0f - fConst2);
+		for (int i=0; i<2; i++) fRec1[i] = 0;
+		fConst4 = (1.0f - fConst1);
+		for (int i=0; i<2; i++) fRec0[i] = 0;
+		fslider0 = 0.0f;
 	}
 	virtual void init(int samplingFreq) {
 		classInit(samplingFreq);
@@ -743,16 +791,28 @@ class mydsp : public dsp {
 	}
 	virtual void buildUserInterface(UI* interface) {
 		interface->openVerticalBox("bopIt");
+		interface->addVerticalBargraph("amp", &fbargraph0, 0.0f, 1e+02f);
+		interface->addHorizontalSlider("poopSlider", &fslider0, 0.0f, 0.0f, 1.0f, 0.1f);
 		interface->closeBox();
 	}
 	virtual void compute (int count, FAUSTFLOAT** input, FAUSTFLOAT** output) {
+		float 	fSlow0 = fslider0;
 		FAUSTFLOAT* input0 = input[0];
+		FAUSTFLOAT* input1 = input[1];
 		FAUSTFLOAT* output0 = output[0];
 		for (int i=0; i<count; i++) {
-			output0[i] = (FAUSTFLOAT)(float)input0[i] * 0;
+			float fTemp0 = fabsf((float)input0[i]);
+			fRec1[0] = ((fConst3 * fTemp0) + (fConst2 * max(fTemp0, fRec1[1])));
+			fRec0[0] = ((fConst4 * fRec1[0]) + (fConst1 * fRec0[1]));
+			fbargraph0 = (fRec0[0] > 0.7f);
+			output0[i] = (FAUSTFLOAT)((float)input1[i] + (fSlow0 * fbargraph0));
+			// post processing
+			fRec0[1] = fRec0[0];
+			fRec1[1] = fRec1[0];
 		}
 	}
 };
+
 //**************************************************************
 // Polyphony
 //**************************************************************
@@ -773,21 +833,21 @@ class mydsp : public dsp {
  and/or modify it under the terms of the GNU General Public License
  as published by the Free Software Foundation; either version 3 of
  the License, or (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; If not, see <http://www.gnu.org/licenses/>.
- 
+
  EXCEPTION : As a special exception, you may create a larger work
  that contains this FAUST architecture section and distribute
  that work under terms of your choice, so long as this FAUST
  architecture section is not modified.
- 
- 
+
+
  ************************************************************************
  ************************************************************************/
 
@@ -813,10 +873,10 @@ static bool ends_with (std::string const& str, std::string const& end)
 #define kReleaseVoice     -1
 
 struct mydsp_voice : public MapUI {
-    
+
     mydsp fVoice;
     int fNote;
-    
+
     mydsp_voice(int sample_rate)
     {
         fVoice.init(sample_rate);
@@ -828,19 +888,19 @@ struct mydsp_voice : public MapUI {
 struct mydsp_poly
 {
     std::string fJSON;
-    
+
     mydsp_voice** fVoiceTable;
-    
+
     std::string fGateLabel;
     std::string fGainLabel;
     std::string fFreqLabel;
-    
+
     int fMaxPolyphony;
-    
+
     FAUSTFLOAT** fNoteOutputs;
     int fNumOutputs;
-    
-    inline float mixVoice(int count, FAUSTFLOAT** outputBuffer, FAUSTFLOAT** mixBuffer) 
+
+    inline float mixVoice(int count, FAUSTFLOAT** outputBuffer, FAUSTFLOAT** mixBuffer)
     {
     	float level = 0;
         for (int i = 0; i < fNumOutputs; i++) {
@@ -853,19 +913,19 @@ struct mydsp_poly
         }
         return level;
     }
-    
-    inline float midiToFreq(float note) 
+
+    inline float midiToFreq(float note)
     {
         return 440.0f * powf(2.0f, (note-69.0f)/12.0f);
     }
-    
-    inline void clearOutput(int count, FAUSTFLOAT** mixBuffer) 
+
+    inline void clearOutput(int count, FAUSTFLOAT** mixBuffer)
     {
         for (int i = 0; i < fNumOutputs; i++) {
             memset(mixBuffer[i], 0, count * sizeof(FAUSTFLOAT));
         }
     }
-    
+
     inline int getVoice(int note)
     {
         for (int i = 0; i < fMaxPolyphony; i++) {
@@ -873,33 +933,33 @@ struct mydsp_poly
         }
         return kReleaseVoice;
     }
-    
+
     mydsp_poly(int sample_rate, int buffer_size, int max_polyphony)
     {
         fMaxPolyphony = max_polyphony;
         fVoiceTable = new mydsp_voice*[max_polyphony];
-        
-        // Init it with supplied sample_rate 
+
+        // Init it with supplied sample_rate
         for (int i = 0; i < fMaxPolyphony; i++) {
             fVoiceTable[i] = new mydsp_voice(sample_rate);
         }
-        
+
         // Init audio output buffers
         fNumOutputs = fVoiceTable[0]->fVoice.getNumOutputs();
         fNoteOutputs = new FAUSTFLOAT*[fNumOutputs];
         for (int i = 0; i < fNumOutputs; i++) {
             fNoteOutputs[i] = new FAUSTFLOAT[buffer_size];
         }
-        
+
         // Creates JSON
         JSONUI builder(fVoiceTable[0]->fVoice.getNumInputs(), fVoiceTable[0]->fVoice.getNumOutputs());
         mydsp::metadata(&builder);
         fVoiceTable[0]->fVoice.buildUserInterface(&builder);
         fJSON = builder.JSON();
-        
+
         // Keep gain, freq and gate labels
         std::map<std::string, FAUSTFLOAT*>::iterator it;
-        
+
         for (it = fVoiceTable[0]->getMap().begin(); it != fVoiceTable[0]->getMap().end(); it++) {
             std::string label = (*it).first;
             if (ends_with(label, "/gate")) {
@@ -911,25 +971,25 @@ struct mydsp_poly
             }
         }
     }
-    
+
     virtual ~mydsp_poly()
     {
         for (int i = 0; i < fNumOutputs; i++) {
             delete[] fNoteOutputs[i];
         }
         delete[] fNoteOutputs;
-        
+
         for (int i = 0; i < fMaxPolyphony; i++) {
             delete fVoiceTable[i];
         }
         delete [] fVoiceTable;
     }
-    
-    void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) 
+
+    void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs)
     {
         // First clear the outputs
         clearOutput(count, outputs);
-          
+
         // Then mix all voices
         for (int i = 0; i < fMaxPolyphony; i++) {
         	if (fVoiceTable[i]->fNote != kFreeVoice){
@@ -939,22 +999,22 @@ struct mydsp_poly
             }
         }
     }
-    
+
     int getNumInputs()
     {
         return fVoiceTable[0]->fVoice.getNumInputs();
     }
-    
+
     int getNumOutputs()
     {
         return fVoiceTable[0]->fVoice.getNumOutputs();
     }
-    
+
     void keyOn(int channel, int pitch, int velocity)
     {
         int voice = getVoice(kFreeVoice);
         if (voice == kReleaseVoice) voice = getVoice(kReleaseVoice);  // Gets a free voice
-        
+
         if (voice >= 0) {
             printf("noteOn %d\n", voice);
             fVoiceTable[voice]->setValue(fFreqLabel, midiToFreq(pitch));
@@ -965,7 +1025,7 @@ struct mydsp_poly
             printf("No more free voice...\n");
         }
     }
-    
+
     void keyOff(int channel, int pitch)
     {
         int voice = getVoice(pitch);
@@ -977,7 +1037,7 @@ struct mydsp_poly
             printf("Playing voice not found...\n");
         }
     }
-    
+
     void pitchBend(int channel, int refPitch, float pitch)
     {
     	int voice = getVoice(refPitch);
@@ -987,22 +1047,22 @@ struct mydsp_poly
         	printf("Playing voice not found...\n");
         }
     }
-    
+
     void ctrlChange(int channel, int ctrl, int value)
     {}
-    
+
     const char* getJSON()
     {
         return fJSON.c_str();
     }
-    
+
     void setValue(const char* path, float value)
     {
         for (int i = 0; i < fMaxPolyphony; i++) {
             fVoiceTable[i]->setValue(path, value);
         }
     }
-    
+
     void setValue(const char* path, int pitch, float value)
     {
     	int voice = getVoice(pitch);
@@ -1010,23 +1070,23 @@ struct mydsp_poly
     		fVoiceTable[voice]->setValue(path, value);
     	}
     }
-    
+
     float getValue(const char* path)
     {
         return fVoiceTable[0]->getValue(path);
     }
-    
+
 };
-   
+
 extern "C" {
-    
+
     // C like API
-    mydsp_poly* mydsp_poly_constructor(int sample_rate, int buffer_size, int max_polyphony) 
+    mydsp_poly* mydsp_poly_constructor(int sample_rate, int buffer_size, int max_polyphony)
     {
          return new mydsp_poly(sample_rate, buffer_size, max_polyphony);
     }
 
-    void mydsp_poly_destructor(mydsp_poly* n) 
+    void mydsp_poly_destructor(mydsp_poly* n)
     {
         delete n;
     }
@@ -1035,8 +1095,8 @@ extern "C" {
     {
         return n->getJSON();
     }
-  
-    void mydsp_poly_compute(mydsp_poly* n, int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) 
+
+    void mydsp_poly_compute(mydsp_poly* n, int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs)
     {
         n->compute(count, inputs, outputs);
     }
@@ -1060,17 +1120,17 @@ extern "C" {
     {
         n->keyOff(channel, pitch);
     }
-    
+
     void mydsp_poly_ctrlChange(mydsp_poly* n, int channel, int ctrl, int value)
     {
         n->ctrlChange(channel, ctrl, value);
     }
-    
+
     void mydsp_poly_pitchBend(mydsp_poly* n, int channel, int refPitch, float pitch)
     {
         n->pitchBend(channel, refPitch, pitch);
     }
-    
+
     void mydsp_poly_setValue(mydsp_poly* n, const char* path, float value)
     {
         n->setValue(path, value);
@@ -1080,7 +1140,7 @@ extern "C" {
     {
         return n->getValue(path);
     }
-        
+
 }
 
 #endif
@@ -1126,7 +1186,7 @@ extern "C" {
 
 /*
 * This is an interface for OpenSL ES to make it easier to use with Android
-* devices.  
+* devices.
 */
 
 #include <SLES/OpenSLES.h>
