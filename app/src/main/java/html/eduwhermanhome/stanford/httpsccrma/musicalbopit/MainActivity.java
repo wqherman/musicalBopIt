@@ -60,6 +60,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         int bufferLength = 512;
         dsp_faust.init(samplingRate,bufferLength);
         dsp_faust.start();
+        //dsp_faust.setParam("/bopIt/ampButton", 1f);
+        dsp_faust.setParam("/bopIt/tapButton", 1f);
+        dsp_faust.setParam("/bopIt/shakeButton", 1f);
 
         //Get elements from the UI that we'll need to change
         final Button startbutt = (Button) this.findViewById(R.id.startbutton);
@@ -116,7 +119,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             shaken = false;
                         } else if(newCommand == 2 && amplitudeTrigger){
                             amplitudeTrigger = false;
-                            //dsp_faust.setParam("/bopIt/ampButton", 0f);
                             break;
                         }
                     }
@@ -171,10 +173,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
                     //set a variable to tell our command thread that we pressed the button
+                    dsp_faust.setParam("/bopIt/tapButton",0f);
                     screenTap = true;
-
                     //send faust an indication that we need the effect associated with this to happen
                 } else if(event.getAction() == MotionEvent.ACTION_UP){
+                    dsp_faust.setParam("/bopIt/tapButton",1f);
                     //probably do nothing, or tell faust to start the decay envelope of our effect
                 }
                 return false;
@@ -202,9 +205,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 float speed = Math.abs(x + y + z - lastx - lasty - lastz)/diffTime * 10000;
 
                 if(speed > shakenThreshold){
+                    dsp_faust.setParam("/bopIt/shakeButton", 0f);
                     shaken = true;
                 }
-
+                else {
+                    dsp_faust.setParam("/bopIt/shakeButton", 1f);
+                }
                 //set previous values
                 lastx = x;
                 lasty = y;
@@ -213,9 +219,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
             //accelerometer is changed most frequently so we'll poll our faust envelope tracker here
             float ampl = dsp_faust.getParam("/bopIt/amp");
-            if(ampl > 0.6){
+            if(ampl > 0.9){
                 amplitudeTrigger = true;
-                //dsp_faust.setParam("/bopIt/ampButton", 1f);
+                dsp_faust.setParam("/bopIt/ampButton", 0f);
+            }
+            else{
+                dsp_faust.setParam("/bopIt/ampButton", 1f);
             }
         }
     }
