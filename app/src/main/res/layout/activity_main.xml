@@ -3,7 +3,8 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
+    android:background="#000000">
 
     <TextView android:text="Musical Bop It" android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,21 +15,26 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Resample It!"
+        android:text="Tap It!"
+        android:textColor="#c5f1e812"
+        android:textSize="20dp"
         android:id="@+id/button"
         android:background="@drawable/roundedbutton"
         android:layout_marginTop="100dp"
         android:layout_below="@+id/textView"
-        android:layout_toEndOf="@+id/textView" />
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Start!"
+        android:textColor="#c5f1e812"
+        android:background="#c505b4f1"
         android:id="@+id/startbutton"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="69dp"
         android:layout_below="@+id/button"
-        android:layout_centerHorizontal="true" />
+        android:layout_toRightOf="@+id/textView"
+        android:layout_toEndOf="@+id/textView" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -38,6 +44,19 @@
         android:layout_marginTop="40dp"
         android:id="@+id/commandtext"
         android:textSize="30dp"
-        android:text="Commands Are Here"/>
+        android:text="Commands Are Here"
+        android:textColor="#ffffff"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Playback!"
+        android:textColor="#c5f1e812"
+        android:background="#c505b4f1"
+        android:id="@+id/playback"
+        android:layout_below="@+id/button"
+        android:layout_marginTop="69dp"
+        android:layout_alignRight="@+id/button"
+        android:layout_alignEnd="@+id/button" />
 
 </RelativeLayout>

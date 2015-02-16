@@ -34,15 +34,18 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private Random r = new Random();
 
     //booleans used to tell if an action has happened
-    boolean screenTap = false;
-    boolean shaken = false;
-    boolean amplitudeTrigger = false;
+    boolean screenTap = false;          //for the tap button on screen
+    boolean shaken = false;             //for when the phone is shaken
+    boolean clapTrigger = false;        //for when you must clap
+    boolean yellTrigger = false;        //for when you have to make constant noise for the duration of the command
+    boolean ampAbove = false;           //has the amplitude stayed above a set value for the yell command
 
     //keeps the last time the accelerometer data was checked
     long lastUpdate;
 
     //holds last accelerometer data
     float lastx, lasty, lastz;
+    float amplitude;                    //holds our amplitude tracker values from faust
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,13 +64,14 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         dsp_faust.init(samplingRate,bufferLength);
         dsp_faust.start();
         //dsp_faust.setParam("/bopIt/ampButton", 1f);
-        dsp_faust.setParam("/bopIt/tapButton", 1f);
-        dsp_faust.setParam("/bopIt/shakeButton", 1f);
+        //dsp_faust.setParam("/bopIt/tapButton", 1f);
+        //dsp_faust.setParam("/bopIt/shakeButton", 1f);
 
         //Get elements from the UI that we'll need to change
         final Button startbutt = (Button) this.findViewById(R.id.startbutton);
         final TextView commands = (TextView) this.findViewById(R.id.commandtext);
         final Button resample = (Button) this.findViewById(R.id.button);
+        final Button playbackButt = (Button) this.findViewById(R.id.playback);
 
         //this class implements a thread that will generate commands over a specified time without locking up our interface
         //thread
@@ -76,13 +80,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             public void run() {
                 long startTime = System.currentTimeMillis();
                 long endTime = startTime + 15000;
-                long waitTime = 2000;
+                long waitTime = 1500;
                 long startWait;
 
                 while(System.currentTimeMillis() < endTime) {
                     //set text of command, must do this on ui thread since its the only one with
                     //access to the ui elements
-                    final int newCommand = r.nextInt(3);
+                    final int newCommand = r.nextInt(4);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -91,7 +95,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             } else if (newCommand == 1) {
                                 commands.setText("SHAKE IT!");
                             } else if (newCommand == 2) {
-                                commands.setText("BLOW IT!");
+                                commands.setText("CLAP IT!");
+                            } else if (newCommand == 3) {
+                                commands.setText("YELL IT!");
                             }
                         }
                     });
@@ -104,26 +110,53 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             break;
                         } else if(newCommand == 0 && shaken){
                             shaken = false;
-                        } else if(newCommand == 0 && amplitudeTrigger){
-                            amplitudeTrigger = false;
-                        }else if(newCommand == 1 && shaken){
+                            break;
+                        } else if(newCommand == 0 && clapTrigger){
+                            clapTrigger = false;
+                        } else if(newCommand == 0 && yellTrigger){
+                            yellTrigger = false;
+                        } else if(newCommand == 1 && shaken){
                             shaken = false;
                             break;
                         } else if(newCommand == 1 && screenTap){
                             screenTap = false;
-                        } else if(newCommand == 1 && amplitudeTrigger){
-                            amplitudeTrigger = false;
+                            break;
+                        } else if(newCommand == 1 && clapTrigger){
+                            clapTrigger = false;
+                        } else if(newCommand == 1 && yellTrigger){
+                            yellTrigger = false;
                         } else if(newCommand == 2 && screenTap){
                             screenTap = false;
+                            break;
                         } else if(newCommand == 2 && shaken){
                             shaken = false;
-                        } else if(newCommand == 2 && amplitudeTrigger){
-                            amplitudeTrigger = false;
+                        } else if(newCommand == 2 && clapTrigger){
+                            clapTrigger = false;
                             break;
+                        } else if(newCommand == 2 && yellTrigger){
+                            yellTrigger = false;
+                        } else if(newCommand == 3 && screenTap){
+                            screenTap = false;
+                            break;
+                        } else if(newCommand == 3 && shaken){
+                            shaken = false;
+                        } else if(newCommand == 3 && clapTrigger){
+                            clapTrigger = false;
+                        } else if(newCommand == 3 && yellTrigger){
+                            if(amplitude < 0.6)                     //since for yell you need to make noise for the entire wait time
+                            {                                       //so once the command has started we check to see if the amplitude dips
+                                yellTrigger = false;                //below a certain value
+                                ampAbove = false;
+                                break;
+                            } else {
+                                ampAbove = true;
+                            }
                         }
                     }
                     //if we've gone longer than the alloted wait time, exit the thread
-                    if(System.currentTimeMillis() - startWait >= waitTime){
+                    if(ampAbove){
+                        ampAbove = false;
+                    }else if(System.currentTimeMillis() - startWait >= waitTime){
                         startGame = false;
                         runOnUiThread(new Runnable() {
                             @Override
@@ -131,14 +164,22 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                                 commands.setText("Loser!");
                             }
                         });
+                        dsp_faust.setParam("/bopIt/startGame", 0f);
                         return;
                     }
+
+                    //pause for a fraction of a second to give things like the amplitude tracker and
+                    //accelerometer time to settle
+                    long pauseStart = System.currentTimeMillis();
+                    long pauseTime = 250;
+                    while(System.currentTimeMillis() - pauseStart < pauseTime){}
                 }
                 //game has finished!
                 //set all triggers to false just in case and display done on the screen
                 screenTap = false;
                 shaken = false;
-                amplitudeTrigger = false;
+                clapTrigger = false;
+                yellTrigger = false;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -146,6 +187,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     }
                 });
                 startGame = false;
+                dsp_faust.setParam("/bopIt/startGame", 0f);
             }
         };
 
@@ -160,9 +202,25 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         commandGenerator commandThread = new commandGenerator();
                         commandThread.start();
                         startGame = true;
+                        dsp_faust.setParam("/bopIt/startGame", 1f);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
 
+                }
+                return false;
+            }
+        });
+
+        playbackButt.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if(startGame == false){
+                        dsp_faust.setParam("/bopIt/startPlayback", 1f);
+                    }
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                        dsp_faust.setParam("/bopIt/startPlayback", 0f);
                 }
                 return false;
             }
@@ -173,11 +231,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
                     //set a variable to tell our command thread that we pressed the button
-                    dsp_faust.setParam("/bopIt/tapButton",0f);
+                    //dsp_faust.setParam("/bopIt/tapButton",0f);
                     screenTap = true;
                     //send faust an indication that we need the effect associated with this to happen
                 } else if(event.getAction() == MotionEvent.ACTION_UP){
-                    dsp_faust.setParam("/bopIt/tapButton",1f);
+                    //dsp_faust.setParam("/bopIt/tapButton",1f);
                     //probably do nothing, or tell faust to start the decay envelope of our effect
                 }
                 return false;
@@ -205,11 +263,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 float speed = Math.abs(x + y + z - lastx - lasty - lastz)/diffTime * 10000;
 
                 if(speed > shakenThreshold){
-                    dsp_faust.setParam("/bopIt/shakeButton", 0f);
+                    //dsp_faust.setParam("/bopIt/shakeButton", 0f);
                     shaken = true;
                 }
                 else {
-                    dsp_faust.setParam("/bopIt/shakeButton", 1f);
+                    //dsp_faust.setParam("/bopIt/shakeButton", 1f);
                 }
                 //set previous values
                 lastx = x;
@@ -218,13 +276,14 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             }
 
             //accelerometer is changed most frequently so we'll poll our faust envelope tracker here
-            float ampl = dsp_faust.getParam("/bopIt/amp");
-            if(ampl > 0.9){
-                amplitudeTrigger = true;
-                dsp_faust.setParam("/bopIt/ampButton", 0f);
+            amplitude = dsp_faust.getParam("/bopIt/amp");
+            if(amplitude > 0.9){
+                clapTrigger = true;
+                yellTrigger = true;
+                //dsp_faust.setParam("/bopIt/ampButton", 0f);
             }
             else{
-                dsp_faust.setParam("/bopIt/ampButton", 1f);
+                //dsp_faust.setParam("/bopIt/ampButton", 1f);
             }
         }
     }

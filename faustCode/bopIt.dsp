@@ -16,7 +16,7 @@ tapCounter = +(1)*(tapGate)~_ : int;
 ampCounter = +(1)*(ampGate)~_ : int;
 
 //track the amplitude of the mic, use vbargraph so that we can send the value back to JAVA
-amplitudeTracker = _:amp_follower_ud(0.001, 0.06);
+amplitudeTracker = _:amp_follower_ud(0.001, 0.2);
 amplitude = amplitudeTracker:vbargraph("amp",0,100)*hslider("poopSlider",0,0,1,0.1);
 
 //create the wah effect on our input signal when the amplitude is above 0.6, this corresponds to 
@@ -29,4 +29,6 @@ modEffect = _*osc(40);
 //comb filter effect to be applied at amplitude changes
 combEffect = _:fb_comb(4096,2048,0.5,0.5);
 
-process = _<:(_<:(_*(tapCounter >= 88200)*(shakeCounter >= 88200)*(ampCounter >= 88200)),(wahEffect*(tapCounter < 88200)),(modEffect*(shakeCounter < 88200)):>_),(combEffect*(ampCounter <= 88200)),amplitude:>_;
+/*process = _<:(_<:(_*(tapCounter >= 88200)*(shakeCounter >= 88200)*(ampCounter >= 88200)),(wahEffect*(tapCounter < 88200)),(modEffect*(shakeCounter < 88200)):>_),(combEffect*(ampCounter <= 88200)),amplitude:>_;*/
+
+process = _:amplitude;
