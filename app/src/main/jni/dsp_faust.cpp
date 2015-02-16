@@ -5,7 +5,6 @@
 *  Search for "256b" in this file, that's the code you want to edit...
 */
 
-
 #include <math.h>
 #include <android/log.h>
 
@@ -717,6 +716,7 @@ class MapUI : public PathUI
 //
 // Code generated with Faust 0.9.58 (http://faust.grame.fr)
 //-----------------------------------------------------
+#include "beat.h"
 #ifndef FAUSTFLOAT
 #define FAUSTFLOAT float
 #endif
@@ -745,6 +745,7 @@ class mydsp : public dsp {
 	int   playbackBuffs;
 	int     playbackPos;
 	int     recordingPos;
+	int     beatPos;
 	FAUSTFLOAT 	fbargraph0;
 	FAUSTFLOAT 	fslider0;
   public:
@@ -797,6 +798,7 @@ class mydsp : public dsp {
 		playbackStarted = 0;
 		playbackPos = 0;
 		recordingPos = 0;
+		beatPos = 0;
 	}
 	virtual void init(int samplingFreq) {
 		classInit(samplingFreq);
@@ -821,28 +823,24 @@ class mydsp : public dsp {
 			fbargraph0 = fRec0[0];
 
 			if(gameStarted == 1){
-			recordingPos = (i+count*numBuffs) % ((int)fSamplingFreq*20);
-			    recording[i+count*numBuffs] = input0[i];
+			    recordingPos = (recordingPos + 1) % ((int)fSamplingFreq*20);
+			    recording[recordingPos] = input0[i];
 			}
 
 			if(playbackStarted == 1)
 			{
-			    playbackPos = (i+playbackBuffs*count) % ((int)fSamplingFreq*20);
-			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + recording[playbackPos];
+			    beatPos = (beatPos + 1) % 776544;
+			    playbackPos = (playbackPos + 1) % ((int)fSamplingFreq*20);
+			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + recording[playbackPos] + (FAUSTFLOAT)beat[beatPos];
+			} else if(gameStarted == 1){
+			    beatPos = (beatPos + 1) % 776544;
+			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + (FAUSTFLOAT)beat[beatPos];
 			} else{
 			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0);
 			}
 			// post processing
 			fRec0[1] = fRec0[0];
 			fRec1[1] = fRec1[0];
-		}
-		if(gameStarted == 1)
-		{
-		    numBuffs += 1;
-		}
-		if(playbackStarted == 1)
-		{
-		    playbackBuffs += 1;
 		}
 	}
 };
