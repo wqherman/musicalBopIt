@@ -717,6 +717,8 @@ class MapUI : public PathUI
 // Code generated with Faust 0.9.58 (http://faust.grame.fr)
 //-----------------------------------------------------
 #include "beat.h"
+#include "scratch.h"
+#include "airyhorn.h"
 #ifndef FAUSTFLOAT
 #define FAUSTFLOAT float
 #endif
@@ -738,14 +740,16 @@ class mydsp : public dsp {
 	float 	fRec1[2];
 	float 	fConst4;
 	float 	fRec0[2];
-	float   gameStarted;
-	float   *recording;
-	int     numBuffs;
-	float   playbackStarted;
-	int   playbackBuffs;
-	int     playbackPos;
-	int     recordingPos;
-	int     beatPos;
+	float   gameStarted;        //has the player started the game
+	float   *recording;         //array to hold the noises made by the player
+	float   playbackStarted;    //has the player pressed the playback button
+	int     playbackPos;        //playback index for the recording buffer
+	int     recordingPos;       //write index for the recording buffer
+	int     beatPos;            //playback index of the background beat
+	int     scratchPos;         //playback of the turntable scratch
+	float   scratchIt;          //tells faust that the turntable scratch should be added to the recording
+	int     hornPos;            //playback index of the airhorn
+	float   hornIt;             //tells faust the airhorn should be added to the recording
 	FAUSTFLOAT 	fbargraph0;
 	FAUSTFLOAT 	fslider0;
   public:
@@ -794,11 +798,14 @@ class mydsp : public dsp {
 		fslider0 = 0.0f;
 		gameStarted = 0;
 		recording = new float[fSamplingFreq*20];
-		numBuffs = 0;
 		playbackStarted = 0;
 		playbackPos = 0;
 		recordingPos = 0;
 		beatPos = 0;
+		scratchPos = 54069;      //initialize the turntable and horn indices to the end so they wont play
+		hornPos = 92499;
+		hornIt = 0;
+		scratchIt = 0;
 	}
 	virtual void init(int samplingFreq) {
 		classInit(samplingFreq);
@@ -810,6 +817,8 @@ class mydsp : public dsp {
 		interface->addHorizontalSlider("poopSlider", &fslider0, 0.0f, 0.0f, 1.0f, 0.1f);
 		interface->addButton("startGame",&gameStarted);
 		interface->addButton("startPlayback",&playbackStarted);
+		interface->addButton("scratchTime",&scratchIt);
+		interface->addButton("hornTime",&hornIt);
 		interface->closeBox();
 	}
 	virtual void compute (int count, FAUSTFLOAT** input, FAUSTFLOAT** output) {
@@ -824,17 +833,38 @@ class mydsp : public dsp {
 
 			if(gameStarted == 1){
 			    recordingPos = (recordingPos + 1) % ((int)fSamplingFreq*20);
-			    recording[recordingPos] = input0[i];
+			    recording[recordingPos] = input0[i]*0.8;
+			    if(scratchIt == 1)  //if a scratch has been initiated, start at the beginning
+			    {
+			        scratchPos = 0;
+			        scratchIt = 0;
+			    }
+			    if(scratchPos < 54069)  //only add scratch samples as long there are samples to add
+			    {
+			        recording[recordingPos] += turntableScratch[scratchPos]*0.3;
+			        scratchPos += 1;
+			    }
+
+			    if(hornIt == 1)     //when a horn is initiated reset the index to zero
+			    {
+			        hornPos = 0;
+			        hornIt = 0;
+			    }
+			    if(hornPos < 92499) //keep adding horn samples until we've reached the end of it
+			    {
+			        recording[recordingPos] += airhorn[hornPos]*0.2;
+			        hornPos += 1;
+			    }
 			}
 
 			if(playbackStarted == 1)
 			{
 			    beatPos = (beatPos + 1) % 776544;
 			    playbackPos = (playbackPos + 1) % ((int)fSamplingFreq*20);
-			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + recording[playbackPos] + (FAUSTFLOAT)beat[beatPos];
+			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + recording[playbackPos] + (FAUSTFLOAT)beat[beatPos]*2.5;
 			} else if(gameStarted == 1){
 			    beatPos = (beatPos + 1) % 776544;
-			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + (FAUSTFLOAT)beat[beatPos];
+			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + (FAUSTFLOAT)beat[beatPos]*2.5;
 			} else{
 			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0);
 			}

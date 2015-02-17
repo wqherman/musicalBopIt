@@ -1,6 +1,7 @@
 package html.eduwhermanhome.stanford.httpsccrma.musicalbopit;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -63,9 +64,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         int bufferLength = 512;
         dsp_faust.init(samplingRate,bufferLength);
         dsp_faust.start();
-        //dsp_faust.setParam("/bopIt/ampButton", 1f);
-        //dsp_faust.setParam("/bopIt/tapButton", 1f);
-        //dsp_faust.setParam("/bopIt/shakeButton", 1f);
 
         //Get elements from the UI that we'll need to change
         final Button startbutt = (Button) this.findViewById(R.id.startbutton);
@@ -79,8 +77,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             @Override
             public void run() {
                 long startTime = System.currentTimeMillis();
+                long waitTime = 1304;
                 long endTime = startTime + 15000;
-                long waitTime = 1500;
                 long startWait;
 
                 while(System.currentTimeMillis() < endTime) {
@@ -107,31 +105,48 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     while(System.currentTimeMillis()-startWait < waitTime){
                         if(newCommand == 0 && screenTap){
                             screenTap = false;
+                            dsp_faust.setParam("/bopIt/hornTime",1f);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    commands.setTextColor(Color.GREEN);
+                                }
+                            });
                             break;
                         } else if(newCommand == 0 && shaken){
                             shaken = false;
-                            break;
                         } else if(newCommand == 0 && clapTrigger){
                             clapTrigger = false;
                         } else if(newCommand == 0 && yellTrigger){
                             yellTrigger = false;
                         } else if(newCommand == 1 && shaken){
                             shaken = false;
+                            dsp_faust.setParam("/bopIt/scratchTime",1f);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    commands.setTextColor(Color.GREEN);
+                                }
+                            });
                             break;
                         } else if(newCommand == 1 && screenTap){
                             screenTap = false;
-                            break;
                         } else if(newCommand == 1 && clapTrigger){
                             clapTrigger = false;
                         } else if(newCommand == 1 && yellTrigger){
                             yellTrigger = false;
                         } else if(newCommand == 2 && screenTap){
                             screenTap = false;
-                            break;
                         } else if(newCommand == 2 && shaken){
                             shaken = false;
                         } else if(newCommand == 2 && clapTrigger){
                             clapTrigger = false;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    commands.setTextColor(Color.GREEN);
+                                }
+                            });
                             break;
                         } else if(newCommand == 2 && yellTrigger){
                             yellTrigger = false;
@@ -153,10 +168,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             }
                         }
                     }
-                    //if we've gone longer than the alloted wait time, exit the thread
-                    if(ampAbove){
+
+                    if(ampAbove){   //if we had to yell and we did, we're good
                         ampAbove = false;
-                    }else if(System.currentTimeMillis() - startWait >= waitTime){
+                    } else if(System.currentTimeMillis() - startWait >= waitTime){   //otherwise if we went longer than we had, we failed
                         startGame = false;
                         runOnUiThread(new Runnable() {
                             @Override
@@ -166,6 +181,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         });
                         dsp_faust.setParam("/bopIt/startGame", 0f);
                         return;
+                    } else {        //otherwise finish waiting for the rest of the wait time to be done
+
                     }
 
                     //pause for a fraction of a second to give things like the amplitude tracker and
@@ -173,6 +190,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     long pauseStart = System.currentTimeMillis();
                     long pauseTime = 250;
                     while(System.currentTimeMillis() - pauseStart < pauseTime){}
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            commands.setTextColor(Color.WHITE);
+                        }
+                    });
                 }
                 //game has finished!
                 //set all triggers to false just in case and display done on the screen
@@ -231,11 +254,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
                     //set a variable to tell our command thread that we pressed the button
-                    //dsp_faust.setParam("/bopIt/tapButton",0f);
                     screenTap = true;
                     //send faust an indication that we need the effect associated with this to happen
                 } else if(event.getAction() == MotionEvent.ACTION_UP){
-                    //dsp_faust.setParam("/bopIt/tapButton",1f);
                     //probably do nothing, or tell faust to start the decay envelope of our effect
                 }
                 return false;
@@ -263,12 +284,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 float speed = Math.abs(x + y + z - lastx - lasty - lastz)/diffTime * 10000;
 
                 if(speed > shakenThreshold){
-                    //dsp_faust.setParam("/bopIt/shakeButton", 0f);
                     shaken = true;
                 }
-                else {
-                    //dsp_faust.setParam("/bopIt/shakeButton", 1f);
-                }
+
                 //set previous values
                 lastx = x;
                 lasty = y;
@@ -280,10 +298,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             if(amplitude > 0.9){
                 clapTrigger = true;
                 yellTrigger = true;
-                //dsp_faust.setParam("/bopIt/ampButton", 0f);
-            }
-            else{
-                //dsp_faust.setParam("/bopIt/ampButton", 1f);
             }
         }
     }
