@@ -78,7 +78,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             public void run() {
                 long startTime = System.currentTimeMillis();
                 long waitTime = 1304;
-                long endTime = startTime + 15000;
+                long endTime = startTime + 20000;
                 long startWait;
 
                 while(System.currentTimeMillis() < endTime) {
@@ -99,8 +99,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             }
                         }
                     });
-                    //wait for 2 seconds for the user to execute the command otherwise shut down the
-                    //thread
+                    //wait for the user to execute the proper command, if they take too long they fail
+                    //if we've finished 10 seconds make it harder
+                    if(System.currentTimeMillis() > startTime+10000)
+                    {
+                        waitTime = 652;
+                    }
                     startWait = System.currentTimeMillis();
                     while(System.currentTimeMillis()-startWait < waitTime){
                         if(newCommand == 0 && screenTap){

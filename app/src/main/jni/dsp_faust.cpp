@@ -797,7 +797,7 @@ class mydsp : public dsp {
 		for (int i=0; i<2; i++) fRec0[i] = 0;
 		fslider0 = 0.0f;
 		gameStarted = 0;
-		recording = new float[fSamplingFreq*20];
+		recording = new float[fSamplingFreq*21];
 		playbackStarted = 0;
 		playbackPos = 0;
 		recordingPos = 0;
@@ -832,7 +832,7 @@ class mydsp : public dsp {
 			fbargraph0 = fRec0[0];
 
 			if(gameStarted == 1){
-			    recordingPos = (recordingPos + 1) % ((int)fSamplingFreq*20);
+			    recordingPos = (recordingPos + 1) % ((int)fSamplingFreq*21);
 			    recording[recordingPos] = input0[i]*0.8;
 			    if(scratchIt == 1)  //if a scratch has been initiated, start at the beginning
 			    {
