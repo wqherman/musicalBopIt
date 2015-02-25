@@ -1,8 +1,8 @@
 //
 import("music.lib");
 import("filter.lib");
-import("effect.lib");
 import("oscillator.lib");
+import("effectNew.lib");
 
 //buttons used to get values from the interface, these are triggers that will be set
 //when th eappropriate bop it action is performed (tapping the screen, shaking, etc)
@@ -31,4 +31,4 @@ combEffect = _:fb_comb(4096,2048,0.5,0.5);
 
 /*process = _<:(_<:(_*(tapCounter >= 88200)*(shakeCounter >= 88200)*(ampCounter >= 88200)),(wahEffect*(tapCounter < 88200)),(modEffect*(shakeCounter < 88200)):>_),(combEffect*(ampCounter <= 88200)),amplitude:>_;*/
 
-process = _:amplitude;
+process = _<: amplitude, mono_freeverb(hslider("f1",0,0,1,0.1),hslider("f2",0,0,1,0.1),hslider("f3",0,0,1,0.1),hslider("f4",0,0,1,0.1)) :> _;

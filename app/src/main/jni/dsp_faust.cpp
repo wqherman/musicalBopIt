@@ -716,13 +716,12 @@ class MapUI : public PathUI
 //
 // Code generated with Faust 0.9.58 (http://faust.grame.fr)
 //-----------------------------------------------------
-#include "beat.h"
-#include "scratch.h"
-#include "airyhorn.h"
 #ifndef FAUSTFLOAT
 #define FAUSTFLOAT float
 #endif
-
+#include "beat.h"
+#include "scratch.h"
+#include "airyhorn.h"
 typedef long double quad;
 /* link with  */
 #include <math.h>
@@ -740,18 +739,67 @@ class mydsp : public dsp {
 	float 	fRec1[2];
 	float 	fConst4;
 	float 	fRec0[2];
-	float   gameStarted;        //has the player started the game
-	float   *recording;         //array to hold the noises made by the player
-	float   playbackStarted;    //has the player pressed the playback button
-	int     playbackPos;        //playback index for the recording buffer
-	int     recordingPos;       //write index for the recording buffer
-	int     beatPos;            //playback index of the background beat
-	int     scratchPos;         //playback of the turntable scratch
-	float   scratchIt;          //tells faust that the turntable scratch should be added to the recording
-	int     hornPos;            //playback index of the airhorn
-	float   hornIt;             //tells faust the airhorn should be added to the recording
 	FAUSTFLOAT 	fbargraph0;
 	FAUSTFLOAT 	fslider0;
+	FAUSTFLOAT 	fslider1;
+	FAUSTFLOAT 	fslider2;
+	float 	fRec11[2];
+	FAUSTFLOAT 	fslider3;
+	int 	IOTA;
+	float 	fVec0[8192];
+	int 	iConst5;
+	FAUSTFLOAT 	fslider4;
+	float 	fRec10[2];
+	float 	fRec13[2];
+	float 	fVec1[8192];
+	int 	iConst6;
+	float 	fRec12[2];
+	float 	fRec15[2];
+	float 	fVec2[8192];
+	int 	iConst7;
+	float 	fRec14[2];
+	float 	fRec17[2];
+	float 	fVec3[8192];
+	int 	iConst8;
+	float 	fRec16[2];
+	float 	fRec19[2];
+	float 	fVec4[8192];
+	int 	iConst9;
+	float 	fRec18[2];
+	float 	fRec21[2];
+	float 	fVec5[8192];
+	int 	iConst10;
+	float 	fRec20[2];
+	float 	fRec23[2];
+	float 	fVec6[8192];
+	int 	iConst11;
+	float 	fRec22[2];
+	float 	fRec25[2];
+	float 	fVec7[8192];
+	int 	iConst12;
+	float 	fRec24[2];
+	float 	fVec8[1024];
+	int 	iConst13;
+	float 	fRec8[2];
+	float 	fVec9[1024];
+	int 	iConst14;
+	float 	fRec6[2];
+	float 	fVec10[1024];
+	int 	iConst15;
+	float 	fRec4[2];
+	float 	fVec11[1024];
+	int 	iConst16;
+	float 	fRec2[2];
+	float   gameStarted;        //has the player started the game
+    float   *recording;         //array to hold the noises made by the player
+    float   playbackStarted;    //has the player pressed the playback button
+    int     playbackPos;        //playback index for the recording buffer
+    int     recordingPos;       //write index for the recording buffer
+    int     beatPos;            //playback index of the background beat
+    int     scratchPos;         //playback of the turntable scratch
+    float   scratchIt;          //tells faust that the turntable scratch should be added to the recording
+    int     hornPos;            //playback index of the airhorn
+    float   hornIt;             //tells faust the airhorn should be added to the recording
   public:
 	static void metadata(Meta* m) 	{
 		m->declare("music.lib/name", "Music Library");
@@ -770,16 +818,21 @@ class mydsp : public dsp {
 		m->declare("filter.lib/version", "1.29");
 		m->declare("filter.lib/license", "STK-4.3");
 		m->declare("filter.lib/reference", "https://ccrma.stanford.edu/~jos/filters/");
-		m->declare("effect.lib/version", "1.33");
-		m->declare("effect.lib/license", "STK-4.3");
-		m->declare("effect.lib/name", "Faust Audio Effect Library");
-		m->declare("effect.lib/author", "Julius O. Smith (jos at ccrma.stanford.edu)");
-		m->declare("effect.lib/copyright", "Julius O. Smith III");
 		m->declare("oscillator.lib/name", "Faust Oscillator Library");
 		m->declare("oscillator.lib/author", "Julius O. Smith (jos at ccrma.stanford.edu)");
 		m->declare("oscillator.lib/copyright", "Julius O. Smith III");
 		m->declare("oscillator.lib/version", "1.11");
 		m->declare("oscillator.lib/license", "STK-4.3");
+		m->declare("effectNew.lib/name", "Faust Audio Effect Library");
+		m->declare("effectNew.lib/author", "Julius O. Smith (jos at ccrma.stanford.edu)");
+		m->declare("effectNew.lib/copyright", "Julius O. Smith III");
+		m->declare("effectNew.lib/version", "1.33");
+		m->declare("effectNew.lib/license", "STK-4.3");
+		m->declare("effectNew.lib/exciter_name", "Harmonic Exciter");
+		m->declare("effectNew.lib/exciter_author", "Priyanka Shekar (pshekar@ccrma.stanford.edu)");
+		m->declare("effectNew.lib/exciter_copyright", "Copyright (c) 2013 Priyanka Shekar");
+		m->declare("effectNew.lib/exciter_version", "1.0");
+		m->declare("effectNew.lib/exciter_license", "MIT License (MIT)");
 	}
 
 	virtual int getNumInputs() 	{ return 1; }
@@ -796,16 +849,64 @@ class mydsp : public dsp {
 		fConst4 = (1.0f - fConst1);
 		for (int i=0; i<2; i++) fRec0[i] = 0;
 		fslider0 = 0.0f;
-		gameStarted = 0;
-		recording = new float[fSamplingFreq*21];
-		playbackStarted = 0;
-		playbackPos = 0;
-		recordingPos = 0;
-		beatPos = 0;
-		scratchPos = 54069;      //initialize the turntable and horn indices to the end so they wont play
-		hornPos = 92499;
-		hornIt = 0;
-		scratchIt = 0;
+		fslider1 = 0.0f;
+		fslider2 = 0.0f;
+		for (int i=0; i<2; i++) fRec11[i] = 0;
+		fslider3 = 0.0f;
+		IOTA = 0;
+		for (int i=0; i<8192; i++) fVec0[i] = 0;
+		iConst5 = int((0.03666666666666667f * iConst0));
+		fslider4 = 0.0f;
+		for (int i=0; i<2; i++) fRec10[i] = 0;
+		for (int i=0; i<2; i++) fRec13[i] = 0;
+		for (int i=0; i<8192; i++) fVec1[i] = 0;
+		iConst6 = int((0.03530612244897959f * iConst0));
+		for (int i=0; i<2; i++) fRec12[i] = 0;
+		for (int i=0; i<2; i++) fRec15[i] = 0;
+		for (int i=0; i<8192; i++) fVec2[i] = 0;
+		iConst7 = int((0.03380952380952381f * iConst0));
+		for (int i=0; i<2; i++) fRec14[i] = 0;
+		for (int i=0; i<2; i++) fRec17[i] = 0;
+		for (int i=0; i<8192; i++) fVec3[i] = 0;
+		iConst8 = int((0.03224489795918367f * iConst0));
+		for (int i=0; i<2; i++) fRec16[i] = 0;
+		for (int i=0; i<2; i++) fRec19[i] = 0;
+		for (int i=0; i<8192; i++) fVec4[i] = 0;
+		iConst9 = int((0.03074829931972789f * iConst0));
+		for (int i=0; i<2; i++) fRec18[i] = 0;
+		for (int i=0; i<2; i++) fRec21[i] = 0;
+		for (int i=0; i<8192; i++) fVec5[i] = 0;
+		iConst10 = int((0.02895691609977324f * iConst0));
+		for (int i=0; i<2; i++) fRec20[i] = 0;
+		for (int i=0; i<2; i++) fRec23[i] = 0;
+		for (int i=0; i<8192; i++) fVec6[i] = 0;
+		iConst11 = int((0.026938775510204082f * iConst0));
+		for (int i=0; i<2; i++) fRec22[i] = 0;
+		for (int i=0; i<2; i++) fRec25[i] = 0;
+		for (int i=0; i<8192; i++) fVec7[i] = 0;
+		iConst12 = int((0.025306122448979593f * iConst0));
+		for (int i=0; i<2; i++) fRec24[i] = 0;
+		for (int i=0; i<1024; i++) fVec8[i] = 0;
+		iConst13 = (int((0.012607709750566893f * iConst0)) - 1);
+		for (int i=0; i<2; i++) fRec8[i] = 0;
+		for (int i=0; i<1024; i++) fVec9[i] = 0;
+		iConst14 = (int((0.01f * iConst0)) - 1);
+		for (int i=0; i<2; i++) fRec6[i] = 0;
+		for (int i=0; i<1024; i++) fVec10[i] = 0;
+		iConst15 = (int((0.007732426303854875f * iConst0)) - 1);
+		for (int i=0; i<2; i++) fRec4[i] = 0;
+		for (int i=0; i<1024; i++) fVec11[i] = 0;
+		iConst16 = (int((0.00510204081632653f * iConst0)) - 1);
+		for (int i=0; i<2; i++) fRec2[i] = 0;
+		recording = new float[fSamplingFreq*20];
+        playbackStarted = 0;
+        playbackPos = 0;
+        recordingPos = 0;
+        beatPos = 0;
+        scratchPos = 54069; //initialize the turntable and horn indices to the end so they wont play
+        hornPos = 92499;
+        hornIt = 0;
+        scratchIt = 0;
 	}
 	virtual void init(int samplingFreq) {
 		classInit(samplingFreq);
@@ -814,61 +915,145 @@ class mydsp : public dsp {
 	virtual void buildUserInterface(UI* interface) {
 		interface->openVerticalBox("bopIt");
 		interface->addVerticalBargraph("amp", &fbargraph0, 0.0f, 1e+02f);
-		interface->addHorizontalSlider("poopSlider", &fslider0, 0.0f, 0.0f, 1.0f, 0.1f);
+		interface->addHorizontalSlider("f1", &fslider3, 0.0f, 0.0f, 1.0f, 0.1f);
+		interface->addHorizontalSlider("f2", &fslider1, 0.0f, 0.0f, 1.0f, 0.1f);
+		interface->addHorizontalSlider("f3", &fslider2, 0.0f, 0.0f, 1.0f, 0.1f);
+		interface->addHorizontalSlider("f4", &fslider4, 0.0f, 0.0f, 1.0f, 0.1f);
 		interface->addButton("startGame",&gameStarted);
-		interface->addButton("startPlayback",&playbackStarted);
-		interface->addButton("scratchTime",&scratchIt);
-		interface->addButton("hornTime",&hornIt);
+        interface->addButton("startPlayback",&playbackStarted);
+        interface->addButton("scratchTime",&scratchIt);
+        interface->addButton("hornTime",&hornIt);
+		interface->addHorizontalSlider("poopSlider", &fslider0, 0.0f, 0.0f, 1.0f, 0.1f);
 		interface->closeBox();
 	}
 	virtual void compute (int count, FAUSTFLOAT** input, FAUSTFLOAT** output) {
 		float 	fSlow0 = fslider0;
+		float 	fSlow1 = 0.5;      //feedback 2
+		float 	fSlow2 = 0.8*0.4;      //damping on feedback 1
+		float 	fSlow3 = (1 - fSlow2);
+		float 	fSlow4 = 0.5*0.28 + 0.7;       //feedback 1
+		float 	fSlow5 = 0;         //spatial spread in num samples
+		int 	iSlow6 = int((fSlow5 + iConst5));
+		int 	iSlow7 = int((fSlow5 + iConst6));
+		int 	iSlow8 = int((fSlow5 + iConst7));
+		int 	iSlow9 = int((fSlow5 + iConst8));
+		int 	iSlow10 = int((fSlow5 + iConst9));
+		int 	iSlow11 = int((fSlow5 + iConst10));
+		int 	iSlow12 = int((fSlow5 + iConst11));
+		int 	iSlow13 = int((fSlow5 + iConst12));
+		int 	iSlow14 = int((int((fSlow5 + iConst13)) & 1023));
+		float 	fSlow15 = (0 - fSlow1);
+		int 	iSlow16 = int((int((fSlow5 + iConst14)) & 1023));
+		int 	iSlow17 = int((int((fSlow5 + iConst15)) & 1023));
+		int 	iSlow18 = int((int((fSlow5 + iConst16)) & 1023));
 		FAUSTFLOAT* input0 = input[0];
 		FAUSTFLOAT* output0 = output[0];
 		for (int i=0; i<count; i++) {
-			float fTemp0 = fabsf((float)input0[i]);
-			fRec1[0] = ((fConst3 * fTemp0) + (fConst2 * max(fTemp0, fRec1[1])));
+
+			float fTemp0 = (float)input0[i];
+			float fTemp1 = fabsf((float)input0[i]);
+			fRec1[0] = max(fTemp1, ((fConst3 * fTemp1) + (fConst2 * fRec1[1])));
 			fRec0[0] = ((fConst4 * fRec1[0]) + (fConst1 * fRec0[1]));
 			fbargraph0 = fRec0[0];
-
+			fRec11[0] = ((fSlow3 * fRec10[1]) + (fSlow2 * fRec11[1]));
+			fVec0[IOTA&8191] = (fTemp0 + (fSlow4 * fRec11[0]));
+			fRec10[0] = fVec0[(IOTA-iSlow6)&8191];
+			fRec13[0] = ((fSlow3 * fRec12[1]) + (fSlow2 * fRec13[1]));
+			fVec1[IOTA&8191] = (fTemp0 + (fSlow4 * fRec13[0]));
+			fRec12[0] = fVec1[(IOTA-iSlow7)&8191];
+			fRec15[0] = ((fSlow3 * fRec14[1]) + (fSlow2 * fRec15[1]));
+			fVec2[IOTA&8191] = (fTemp0 + (fSlow4 * fRec15[0]));
+			fRec14[0] = fVec2[(IOTA-iSlow8)&8191];
+			fRec17[0] = ((fSlow3 * fRec16[1]) + (fSlow2 * fRec17[1]));
+			fVec3[IOTA&8191] = (fTemp0 + (fSlow4 * fRec17[0]));
+			fRec16[0] = fVec3[(IOTA-iSlow9)&8191];
+			fRec19[0] = ((fSlow3 * fRec18[1]) + (fSlow2 * fRec19[1]));
+			fVec4[IOTA&8191] = (fTemp0 + (fSlow4 * fRec19[0]));
+			fRec18[0] = fVec4[(IOTA-iSlow10)&8191];
+			fRec21[0] = ((fSlow3 * fRec20[1]) + (fSlow2 * fRec21[1]));
+			fVec5[IOTA&8191] = (fTemp0 + (fSlow4 * fRec21[0]));
+			fRec20[0] = fVec5[(IOTA-iSlow11)&8191];
+			fRec23[0] = ((fSlow3 * fRec22[1]) + (fSlow2 * fRec23[1]));
+			fVec6[IOTA&8191] = (fTemp0 + (fSlow4 * fRec23[0]));
+			fRec22[0] = fVec6[(IOTA-iSlow12)&8191];
+			fRec25[0] = ((fSlow3 * fRec24[1]) + (fSlow2 * fRec25[1]));
+			fVec7[IOTA&8191] = (fTemp0 + (fSlow4 * fRec25[0]));
+			fRec24[0] = fVec7[(IOTA-iSlow13)&8191];
+			float fTemp2 = ((((((((fRec24[0] + fRec22[0]) + fRec20[0]) + fRec18[0]) + fRec16[0]) + fRec14[0]) + fRec12[0]) + fRec10[0]) + (fSlow1 * fRec8[1]));
+			fVec8[IOTA&1023] = fTemp2;
+			fRec8[0] = fVec8[(IOTA-iSlow14)&1023];
+			float 	fRec9 = (fSlow15 * fVec8[IOTA&1023]);
+			float fTemp3 = ((fRec9 + fRec8[1]) + (fSlow1 * fRec6[1]));
+			fVec9[IOTA&1023] = fTemp3;
+			fRec6[0] = fVec9[(IOTA-iSlow16)&1023];
+			float 	fRec7 = (fSlow15 * fVec9[IOTA&1023]);
+			float fTemp4 = ((fRec7 + fRec6[1]) + (fSlow1 * fRec4[1]));
+			fVec10[IOTA&1023] = fTemp4;
+			fRec4[0] = fVec10[(IOTA-iSlow17)&1023];
+			float 	fRec5 = (fSlow15 * fVec10[IOTA&1023]);
+			float fTemp5 = ((fRec5 + fRec4[1]) + (fSlow1 * fRec2[1]));
+			fVec11[IOTA&1023] = fTemp5;
+			fRec2[0] = fVec11[(IOTA-iSlow18)&1023];
+			float 	fRec3 = (fSlow15 * fVec11[IOTA&1023]);
+			//output0[i] = (FAUSTFLOAT)((fRec3 + fRec2[1]) + (fSlow0 * fbargraph0));
 			if(gameStarted == 1){
-			    recordingPos = (recordingPos + 1) % ((int)fSamplingFreq*21);
-			    recording[recordingPos] = input0[i]*0.8;
-			    if(scratchIt == 1)  //if a scratch has been initiated, start at the beginning
-			    {
-			        scratchPos = 0;
-			        scratchIt = 0;
-			    }
-			    if(scratchPos < 54069)  //only add scratch samples as long there are samples to add
-			    {
-			        recording[recordingPos] += turntableScratch[scratchPos]*0.3;
-			        scratchPos += 1;
-			    }
+                recordingPos = (recordingPos + 1) % ((int)fSamplingFreq*20);
+                recording[recordingPos] = (FAUSTFLOAT)(fRec3 + fRec2[1])*0.8;
+                if(scratchIt == 1)  //if a scratch has been initiated, start at the beginning
+                {
+                    scratchPos = 0;
+                    scratchIt = 0;
+                }
+                if(scratchPos < 54069)  //only add scratch samples as long there are samples to add
+                {
+                    recording[recordingPos] += turntableScratch[scratchPos]*0.3;
+                    scratchPos += 1;
+                }
 
-			    if(hornIt == 1)     //when a horn is initiated reset the index to zero
-			    {
-			        hornPos = 0;
-			        hornIt = 0;
-			    }
-			    if(hornPos < 92499) //keep adding horn samples until we've reached the end of it
-			    {
-			        recording[recordingPos] += airhorn[hornPos]*0.2;
-			        hornPos += 1;
-			    }
-			}
-
+                if(hornIt == 1)     //when a horn is initiated reset the index to zero
+                {
+                    hornPos = 0;
+                    hornIt = 0;
+                }
+                if(hornPos < 92499) //keep adding horn samples until we've reached the end of it
+                {
+                    recording[recordingPos] += airhorn[hornPos]*0.2;
+                    hornPos += 1;
+                }
+            }
 			if(playbackStarted == 1)
-			{
-			    beatPos = (beatPos + 1) % 776544;
-			    playbackPos = (playbackPos + 1) % ((int)fSamplingFreq*20);
-			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + recording[playbackPos] + (FAUSTFLOAT)beat[beatPos]*2.5;
-			} else if(gameStarted == 1){
-			    beatPos = (beatPos + 1) % 776544;
-			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + (FAUSTFLOAT)beat[beatPos]*2.5;
-			} else{
-			    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0);
-			}
+            {
+                beatPos = (beatPos + 1) % 776544;
+                    playbackPos = (playbackPos + 1) % ((int)fSamplingFreq*20);
+                    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + recording[playbackPos] + (FAUSTFLOAT)beat[beatPos]*2.5;
+                } else if(gameStarted == 1){
+                    beatPos = (beatPos + 1) % 776544;
+                    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + (FAUSTFLOAT)beat[beatPos]*2.5;
+                } else{
+                    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0);
+                }
 			// post processing
+			fRec2[1] = fRec2[0];
+			fRec4[1] = fRec4[0];
+			fRec6[1] = fRec6[0];
+			fRec8[1] = fRec8[0];
+			fRec24[1] = fRec24[0];
+			fRec25[1] = fRec25[0];
+			fRec22[1] = fRec22[0];
+			fRec23[1] = fRec23[0];
+			fRec20[1] = fRec20[0];
+			fRec21[1] = fRec21[0];
+			fRec18[1] = fRec18[0];
+			fRec19[1] = fRec19[0];
+			fRec16[1] = fRec16[0];
+			fRec17[1] = fRec17[0];
+			fRec14[1] = fRec14[0];
+			fRec15[1] = fRec15[0];
+			fRec12[1] = fRec12[0];
+			fRec13[1] = fRec13[0];
+			fRec10[1] = fRec10[0];
+			IOTA = IOTA+1;
+			fRec11[1] = fRec11[0];
 			fRec0[1] = fRec0[0];
 			fRec1[1] = fRec1[0];
 		}
