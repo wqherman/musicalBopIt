@@ -20,7 +20,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import java.util.Calendar;
 import java.util.Random;
-
+import android.content.Intent;
 //our faust library
 import com.grame.dsp_faust.dsp_faust;
 
@@ -70,6 +70,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         final TextView commands = (TextView) this.findViewById(R.id.commandtext);
         final Button resample = (Button) this.findViewById(R.id.button);
         final Button playbackButt = (Button) this.findViewById(R.id.playback);
+        final Button serverButton = (Button) this.findViewById(R.id.serverbutton);
 
         //this class implements a thread that will generate commands over a specified time without locking up our interface
         //thread
@@ -89,12 +90,16 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         @Override
                         public void run() {
                             if (newCommand == 0) {
+                                dsp_faust.setParam("/bopIt/tapIt",1f);
                                 commands.setText("TAP IT!");
                             } else if (newCommand == 1) {
+                                dsp_faust.setParam("/bopIt/shakeIt",1f);
                                 commands.setText("SHAKE IT!");
                             } else if (newCommand == 2) {
+                                dsp_faust.setParam("/bopIt/clapIt",1f);
                                 commands.setText("CLAP IT!");
                             } else if (newCommand == 3) {
+                                dsp_faust.setParam("/bopIt/yellIt",1f);
                                 commands.setText("YELL IT!");
                             }
                         }
@@ -262,6 +267,21 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     //send faust an indication that we need the effect associated with this to happen
                 } else if(event.getAction() == MotionEvent.ACTION_UP){
                     //probably do nothing, or tell faust to start the decay envelope of our effect
+                }
+                return false;
+            }
+        });
+
+        serverButton.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                //take us to the next activity, which will be a list of the most popular
+                //upvoted game recordings
+                    Intent intent = new Intent(MainActivity.this, ViewServerActivity.class);
+                    startActivity(intent);
+                } else if(event.getAction() == MotionEvent.ACTION_UP){
+                    //probably do nothing
                 }
                 return false;
             }

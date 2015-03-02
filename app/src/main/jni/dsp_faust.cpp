@@ -722,6 +722,10 @@ class MapUI : public PathUI
 #include "beat.h"
 #include "scratch.h"
 #include "airyhorn.h"
+#include "clapIt.h"
+#include "yellIt.h"
+#include "shakeIt.h"
+#include "tapIt.h"
 typedef long double quad;
 /* link with  */
 #include <math.h>
@@ -800,6 +804,16 @@ class mydsp : public dsp {
     float   scratchIt;          //tells faust that the turntable scratch should be added to the recording
     int     hornPos;            //playback index of the airhorn
     float   hornIt;             //tells faust the airhorn should be added to the recording
+
+    int     tapItPos;           //position in the tap voice command
+    float   tapIt;              //tells its time to say tap it
+    int     shakeItPos;         //pos of shake voice command
+    float   shakeIt;            //time to say the command
+    int     yellItPos;         //pos of yell voice command
+    float   yellIt;            //time to say the command
+    int     clapItPos;         //pos of clap voice command
+    float   clapIt;            //time to say the command
+
   public:
 	static void metadata(Meta* m) 	{
 		m->declare("music.lib/name", "Music Library");
@@ -907,6 +921,15 @@ class mydsp : public dsp {
         hornPos = 92499;
         hornIt = 0;
         scratchIt = 0;
+
+        tapItPos = 17408;
+        tapIt = 0;
+        shakeItPos = 17408;
+        shakeIt = 0;
+        yellItPos = 17408;
+        yellIt = 0;
+        clapItPos = 22048;
+        clapIt = 0;
 	}
 	virtual void init(int samplingFreq) {
 		classInit(samplingFreq);
@@ -923,15 +946,19 @@ class mydsp : public dsp {
         interface->addButton("startPlayback",&playbackStarted);
         interface->addButton("scratchTime",&scratchIt);
         interface->addButton("hornTime",&hornIt);
+        interface->addButton("tapIt",&tapIt);
+        interface->addButton("shakeIt",&shakeIt);
+        interface->addButton("yellIt",&yellIt);
+        interface->addButton("clapIt",&clapIt);
 		interface->addHorizontalSlider("poopSlider", &fslider0, 0.0f, 0.0f, 1.0f, 0.1f);
 		interface->closeBox();
 	}
 	virtual void compute (int count, FAUSTFLOAT** input, FAUSTFLOAT** output) {
 		float 	fSlow0 = fslider0;
-		float 	fSlow1 = 0.5;      //feedback 2
-		float 	fSlow2 = 0.8*0.4;      //damping on feedback 1
+		float 	fSlow1 = 0.2;      //feedback 2
+		float 	fSlow2 = 0.9*0.4;      //damping on feedback 1
 		float 	fSlow3 = (1 - fSlow2);
-		float 	fSlow4 = 0.5*0.28 + 0.7;       //feedback 1
+		float 	fSlow4 = 0.1*0.28 + 0.7;       //feedback 1
 		float 	fSlow5 = 0;         //spatial spread in num samples
 		int 	iSlow6 = int((fSlow5 + iConst5));
 		int 	iSlow7 = int((fSlow5 + iConst6));
@@ -998,7 +1025,7 @@ class mydsp : public dsp {
 			//output0[i] = (FAUSTFLOAT)((fRec3 + fRec2[1]) + (fSlow0 * fbargraph0));
 			if(gameStarted == 1){
                 recordingPos = (recordingPos + 1) % ((int)fSamplingFreq*20);
-                recording[recordingPos] = (FAUSTFLOAT)(fRec3 + fRec2[1])*0.8;
+                recording[recordingPos] = (FAUSTFLOAT)((fRec3 + fRec2[1])*0.3 + 0.7*input0[i]);
                 if(scratchIt == 1)  //if a scratch has been initiated, start at the beginning
                 {
                     scratchPos = 0;
@@ -1006,7 +1033,7 @@ class mydsp : public dsp {
                 }
                 if(scratchPos < 54069)  //only add scratch samples as long there are samples to add
                 {
-                    recording[recordingPos] += turntableScratch[scratchPos]*0.3;
+                    recording[recordingPos] += turntableScratch[scratchPos]*0.5;
                     scratchPos += 1;
                 }
 
@@ -1017,21 +1044,67 @@ class mydsp : public dsp {
                 }
                 if(hornPos < 92499) //keep adding horn samples until we've reached the end of it
                 {
-                    recording[recordingPos] += airhorn[hornPos]*0.2;
+                    recording[recordingPos] += airhorn[hornPos]*0.25;
                     hornPos += 1;
                 }
             }
 			if(playbackStarted == 1)
             {
                 beatPos = (beatPos + 1) % 776544;
-                    playbackPos = (playbackPos + 1) % ((int)fSamplingFreq*20);
-                    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + recording[playbackPos] + (FAUSTFLOAT)beat[beatPos]*2.5;
-                } else if(gameStarted == 1){
-                    beatPos = (beatPos + 1) % 776544;
-                    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + (FAUSTFLOAT)beat[beatPos]*2.5;
-                } else{
-                    output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0);
+                playbackPos = (playbackPos + 1) % ((int)fSamplingFreq*20);
+                output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + recording[playbackPos]*0.5 + (FAUSTFLOAT)beat[beatPos]*2.7;
+            } else if(gameStarted == 1){
+                beatPos = (beatPos + 1) % 776544;
+
+                if(tapIt == 1)          //this chunk of logic resets the position of the command
+                {                       //sound files if a command has been selected
+                    tapItPos = 0;
+                    tapIt = 0;
                 }
+                if(shakeIt == 1)
+                {
+                    shakeItPos = 0;
+                    shakeIt = 0;
+                }
+                if(clapIt == 1)
+                {
+                    clapItPos = 0;
+                    clapIt = 0;
+                }
+                if(yellIt == 1)
+                {
+                    yellItPos = 0;
+                    yellIt = 0;
+                }
+
+                output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + (FAUSTFLOAT)beat[beatPos]*2.5;
+
+                //only add samples of the command audio files if the position is below the maximum
+                //of each
+                if(yellItPos < 17408)
+                {
+                    output0[i] += yellCommand[yellItPos];
+                    yellItPos += 1;
+                }
+                if(clapItPos < 22048)
+                {
+                    output0[i] += clapCommand[clapItPos];
+                    clapItPos += 1;
+                }
+                if(shakeItPos < 17408)
+                {
+                    output0[i] += shakeCommand[shakeItPos];
+                    shakeItPos += 1;
+                }
+                if(tapItPos < 17408)
+                {
+                    output0[i] += tapCommand[tapItPos];
+                    tapItPos += 1;
+                }
+
+            } else{
+                output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0);
+            }
 			// post processing
 			fRec2[1] = fRec2[0];
 			fRec4[1] = fRec4[0];
