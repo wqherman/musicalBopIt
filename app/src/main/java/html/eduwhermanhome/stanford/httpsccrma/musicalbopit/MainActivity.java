@@ -18,11 +18,28 @@ import android.view.View.OnTouchListener;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.Random;
 import android.content.Intent;
 //our faust library
 import com.grame.dsp_faust.dsp_faust;
+import com.mashape.unirest.http.Unirest;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import retrofit.*;
+import retrofit.http.GET;
+import retrofit.http.Path;
+import java.net.URL;
 
 public class MainActivity extends ActionBarActivity implements SensorEventListener{
 
@@ -279,6 +296,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 //take us to the next activity, which will be a list of the most popular
                 //upvoted game recordings
                     Intent intent = new Intent(MainActivity.this, ViewServerActivity.class);
+                    Unirest.get("http://127.0.0.1:8080");
                     startActivity(intent);
                 } else if(event.getAction() == MotionEvent.ACTION_UP){
                     //probably do nothing

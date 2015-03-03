@@ -4,19 +4,148 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="html.eduwhermanhome.stanford.httpsccrma.musicalbopit.ViewServerActivity">
+    tools:context="html.eduwhermanhome.stanford.httpsccrma.musicalbopit.ViewServerActivity"
+    android:background="#000000">
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
+    <TextView
+        android:text="Musical Bop It Hits!"
+        android:textColor="#c5f1e812"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView2" />
+        android:id="@+id/hitstitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:textSize="@dimen/abc_text_size_large_material"/>
 
     <TableLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/textView2"
+        android:layout_below="@+id/hitstitle"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="50dp"
-        ></TableLayout>
+        android:layout_marginTop="50dp">
+
+        <View
+            android:layout_height="2dip"
+            android:background="#a33d05ee"
+            >
+        </View>
+        <TableRow
+            android:id="@+id/row1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            >
+            <TextView
+                android:id="@+id/row1user"
+                android:text="bro"
+                android:textColor="#c5f1e812"
+                android:layout_column="1"
+                />
+            <TextView
+                android:id="@+id/row1title"
+                android:text="broGame69"
+                android:textColor="#c5f1e812"
+                android:layout_marginLeft="60dp"
+                android:layout_column="2"
+                />
+            <TextView
+                android:id="@+id/row1votes"
+                android:text="25"
+                android:textColor="#c5f1e812"
+                android:layout_marginLeft="70dp"
+                android:layout_column="3"
+                />
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_column="4"
+                android:background="#c505b4f1"
+                android:layout_marginLeft="15dp"
+                android:text="!"
+
+            />
+        </TableRow>
+        <View
+            android:layout_height="2dip"
+            android:background="#a33d05ee"
+            >
+        </View>
+        <TableRow
+            android:id="@+id/row2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            >
+            <TextView
+                android:id="@+id/row2user"
+                android:text="dom"
+                android:textColor="#c5f1e812"
+                android:layout_column="1"
+            />
+            <TextView
+                android:id="@+id/row2title"
+                android:text="mafiadon"
+                android:textColor="#c5f1e812"
+                android:layout_marginLeft="60dp"
+                android:layout_column="2"
+            />
+            <TextView
+                android:id="@+id/row2votes"
+                android:text="22"
+                android:textColor="#c5f1e812"
+                android:layout_marginLeft="70dp"
+                android:layout_column="3"
+            />
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_column="4"
+                android:background="#c505b4f1"
+                android:layout_marginLeft="15dp"
+                android:text="!"
+                />
+        </TableRow>
+        <View
+            android:layout_height="2dip"
+            android:background="#a33d05ee"
+            >
+        </View>
+        <TableRow
+            android:id="@+id/row3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip">
+            <TextView
+                android:id="@+id/row3user"
+                android:text="woody"
+                android:textColor="#c5f1e812"
+                android:layout_column="1"
+                />
+            <TextView
+                android:id="@+id/row3title"
+                android:text="jamtime77"
+                android:textColor="#c5f1e812"
+                android:layout_marginLeft="60dp"
+                android:layout_column="2"
+                />
+            <TextView
+                android:id="@+id/row3votes"
+                android:text="12"
+                android:textColor="#c5f1e812"
+                android:layout_marginLeft="70dp"
+                android:layout_column="3"
+                />
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_column="4"
+                android:background="#c505b4f1"
+                android:layout_marginLeft="15dp"
+                android:text="!"
+                />
+        </TableRow>
+    </TableLayout>
 
 </RelativeLayout>
