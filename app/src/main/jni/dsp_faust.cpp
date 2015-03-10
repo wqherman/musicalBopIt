@@ -712,6 +712,12 @@ class MapUI : public PathUI
 // address to access this parameter with setParam on the JAVA side
 // - compute is where all the DSP should be carried out
 //**************************************************************
+
+/* IF WE NEED TO FUCK WITH THE DSP_FAUST.H FILE WE NEED TO RUN THIS IN TERMINAL
+swig -java -package com.grame.dsp_faust -includeall -verbose -outdir app/src/main/java/com/grame/dsp_faust -c++ -I/usr/local/include -I/System/Library/Frameworks/JavaVM.framework/Headers -Iapp/src/main/jni -o app/src/main/jni/java_interface_wrap.cpp dsp_faust_interface.i
+
+
+*/
 //-----------------------------------------------------
 //
 // Code generated with Faust 0.9.58 (http://faust.grame.fr)
@@ -813,8 +819,12 @@ class mydsp : public dsp {
     float   yellIt;            //time to say the command
     int     clapItPos;         //pos of clap voice command
     float   clapIt;            //time to say the command
+    float   shouldDownloadStart;    //tells us if the downloaded track should start playing
+    int     downloadPos;       //read index of the downloaded recording
 
   public:
+    float recordingBuffer[20*44100];
+    float downloadBuffer[20*44100];
 	static void metadata(Meta* m) 	{
 		m->declare("music.lib/name", "Music Library");
 		m->declare("music.lib/author", "GRAME");
@@ -930,6 +940,10 @@ class mydsp : public dsp {
         yellIt = 0;
         clapItPos = 22048;
         clapIt = 0;
+
+        for(int i = 0; i < 20*44100; i++) downloadBuffer[i] = 0.0;
+        shouldDownloadStart = 0;
+        downloadPos = 0;
 	}
 	virtual void init(int samplingFreq) {
 		classInit(samplingFreq);
@@ -951,6 +965,7 @@ class mydsp : public dsp {
         interface->addButton("yellIt",&yellIt);
         interface->addButton("clapIt",&clapIt);
 		interface->addHorizontalSlider("poopSlider", &fslider0, 0.0f, 0.0f, 1.0f, 0.1f);
+		interface->addButton("downloadStart", &shouldDownloadStart);
 		interface->closeBox();
 	}
 	virtual void compute (int count, FAUSTFLOAT** input, FAUSTFLOAT** output) {
@@ -1047,6 +1062,7 @@ class mydsp : public dsp {
                     recording[recordingPos] += airhorn[hornPos]*0.25;
                     hornPos += 1;
                 }
+                recordingBuffer[recordingPos] = recording[recordingPos];    //copy to our buffer to be passed to java
             }
 			if(playbackStarted == 1)
             {
@@ -1102,7 +1118,11 @@ class mydsp : public dsp {
                     tapItPos += 1;
                 }
 
-            } else{
+            } else if(shouldDownloadStart == 1 && downloadPos < 20*44100) {
+                output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0) + downloadBuffer[downloadPos];
+                downloadPos += 1;
+            }
+            else{
                 output0[i] = (FAUSTFLOAT)(fSlow0 * fbargraph0);
             }
 			// post processing
@@ -1129,6 +1149,12 @@ class mydsp : public dsp {
 			fRec11[1] = fRec11[0];
 			fRec0[1] = fRec0[0];
 			fRec1[1] = fRec1[0];
+
+			//if we've reached the end of our download buffer, reset the position and set shouldplay to false
+			if(downloadPos >= 20*44100) {
+			    downloadPos = 0;
+			    shouldDownloadStart = 0;
+			}
 		}
 	}
 };
@@ -2376,4 +2402,12 @@ int setVoiceGain(int pitch, float gain){
  */
 const char *getParamAddress(int id) {
 	return strdup(mapUI.getParamPath(id).c_str());
+}
+
+float getRecordingBuffer(int i){
+    return DSP.recordingBuffer[i];
+}
+
+void setDownloadBuffer(float value, int index){
+    DSP.downloadBuffer[index] = value;
 }

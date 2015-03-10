@@ -31,3 +31,5 @@ void setParam(const char*, float);
 int setVoiceParam(const char*, int, float);
 int setVoiceGain(int, float);
 const char *getParamAddress(int);
+float getRecordingBuffer(int i);
+void setDownloadBuffer(float value, int index);

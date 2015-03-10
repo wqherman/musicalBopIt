@@ -8,7 +8,7 @@
     android:background="#000000">
 
     <TextView
-        android:text="Musical Bop It Hits!"
+        android:text="Now That's What I Call Bop It!"
         android:textColor="#c5f1e812"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,11 +19,12 @@
 
     <TableLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/hitstitle"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="50dp">
+        android:layout_marginTop="50dp"
+        android:stretchColumns="1">
 
         <View
             android:layout_height="2dip"
@@ -32,7 +33,6 @@
         </View>
         <TableRow
             android:id="@+id/row1"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dip"
             >
@@ -40,30 +40,38 @@
                 android:id="@+id/row1user"
                 android:text="bro"
                 android:textColor="#c5f1e812"
-                android:layout_column="1"
+                android:layout_column="0"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 />
-            <TextView
+            <Button
                 android:id="@+id/row1title"
-                android:text="broGame69"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:background="#c505b4f1"
+                android:text="!"
                 android:textColor="#c5f1e812"
-                android:layout_marginLeft="60dp"
-                android:layout_column="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 />
             <TextView
                 android:id="@+id/row1votes"
                 android:text="25"
                 android:textColor="#c5f1e812"
                 android:layout_marginLeft="70dp"
-                android:layout_column="3"
+                android:layout_column="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 />
             <Button
-                android:layout_width="50dp"
+                android:id="@+id/row1upvote"
                 android:layout_height="wrap_content"
-                android:layout_column="4"
+                android:layout_column="3"
                 android:background="#c505b4f1"
                 android:layout_marginLeft="15dp"
                 android:text="!"
-
+                android:layout_width="0dp"
+                android:layout_weight="1"
             />
         </TableRow>
         <View
@@ -81,29 +89,38 @@
                 android:id="@+id/row2user"
                 android:text="dom"
                 android:textColor="#c5f1e812"
-                android:layout_column="1"
+                android:layout_column="0"
+                android:layout_width="0dp"
+                android:layout_weight="1"
             />
-            <TextView
+            <Button
                 android:id="@+id/row2title"
-                android:text="mafiadon"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:background="#c505b4f1"
+                android:text="!"
                 android:textColor="#c5f1e812"
-                android:layout_marginLeft="60dp"
-                android:layout_column="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
             />
             <TextView
                 android:id="@+id/row2votes"
                 android:text="22"
                 android:textColor="#c5f1e812"
                 android:layout_marginLeft="70dp"
-                android:layout_column="3"
+                android:layout_column="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
             />
             <Button
-                android:layout_width="50dp"
+                android:id="@+id/row2upvote"
                 android:layout_height="wrap_content"
-                android:layout_column="4"
+                android:layout_column="3"
                 android:background="#c505b4f1"
                 android:layout_marginLeft="15dp"
                 android:text="!"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 />
         </TableRow>
         <View
@@ -120,32 +137,140 @@
                 android:id="@+id/row3user"
                 android:text="woody"
                 android:textColor="#c5f1e812"
-                android:layout_column="1"
+                android:layout_column="0"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 />
-            <TextView
+            <Button
                 android:id="@+id/row3title"
-                android:text="jamtime77"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:background="#c505b4f1"
+                android:text="!"
                 android:textColor="#c5f1e812"
-                android:layout_marginLeft="60dp"
-                android:layout_column="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 />
             <TextView
                 android:id="@+id/row3votes"
                 android:text="12"
                 android:textColor="#c5f1e812"
                 android:layout_marginLeft="70dp"
-                android:layout_column="3"
+                android:layout_column="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 />
 
             <Button
-                android:layout_width="50dp"
+                android:id="@+id/row3upvote"
                 android:layout_height="wrap_content"
-                android:layout_column="4"
+                android:layout_column="3"
                 android:background="#c505b4f1"
                 android:layout_marginLeft="15dp"
                 android:text="!"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 />
         </TableRow>
+        <View
+            android:layout_height="2dip"
+            android:background="#a33d05ee"
+            >
+        </View>
+        <TableRow
+            android:id="@+id/row4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip">
+            <TextView
+                android:id="@+id/row4user"
+                android:text="woody"
+                android:textColor="#c5f1e812"
+                android:layout_column="0"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+            <Button
+                android:id="@+id/row4title"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:background="#c505b4f1"
+                android:text="!"
+                android:textColor="#c5f1e812"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+            <TextView
+                android:id="@+id/row4votes"
+                android:text="12"
+                android:textColor="#c5f1e812"
+                android:layout_marginLeft="70dp"
+                android:layout_column="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+
+            <Button
+                android:id="@+id/row4upvote"
+                android:layout_height="wrap_content"
+                android:layout_column="3"
+                android:background="#c505b4f1"
+                android:layout_marginLeft="15dp"
+                android:text="!"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+        </TableRow>
+        <View
+            android:layout_height="2dip"
+            android:background="#a33d05ee"
+            >
+        </View>
+        <TableRow
+            android:id="@+id/row5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dip">
+            <TextView
+                android:id="@+id/row5user"
+                android:text="woody"
+                android:textColor="#c5f1e812"
+                android:layout_column="0"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+            <Button
+                android:id="@+id/row5title"
+                android:layout_height="wrap_content"
+                android:layout_column="1"
+                android:background="#c505b4f1"
+                android:text="!"
+                android:textColor="#c5f1e812"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+            <TextView
+                android:id="@+id/row5votes"
+                android:text="12"
+                android:textColor="#c5f1e812"
+                android:layout_marginLeft="70dp"
+                android:layout_column="2"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+
+            <Button
+                android:id="@+id/row5upvote"
+                android:layout_height="wrap_content"
+                android:layout_column="3"
+                android:background="#c505b4f1"
+                android:layout_marginLeft="15dp"
+                android:text="!"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                />
+        </TableRow>
+
     </TableLayout>
 
 </RelativeLayout>

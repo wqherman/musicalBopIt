@@ -29,17 +29,13 @@ import java.util.Random;
 import android.content.Intent;
 //our faust library
 import com.grame.dsp_faust.dsp_faust;
-import com.mashape.unirest.http.Unirest;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.Header;
+import org.apache.http.HttpRequest;
 
-import retrofit.*;
-import retrofit.http.GET;
-import retrofit.http.Path;
-import java.net.URL;
+//loopj http request library
+import com.loopj.android.http.*;
+
 
 public class MainActivity extends ActionBarActivity implements SensorEventListener{
 
@@ -47,7 +43,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
     //should the game start
-    private boolean startGame = false;
+    public static boolean startGame = false;    //static so our playback and post activity can access it
     //random number generator
     private Random r = new Random();
 
@@ -86,7 +82,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         final Button startbutt = (Button) this.findViewById(R.id.startbutton);
         final TextView commands = (TextView) this.findViewById(R.id.commandtext);
         final Button resample = (Button) this.findViewById(R.id.button);
-        final Button playbackButt = (Button) this.findViewById(R.id.playback);
         final Button serverButton = (Button) this.findViewById(R.id.serverbutton);
 
         //this class implements a thread that will generate commands over a specified time without locking up our interface
@@ -206,9 +201,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             }
                         });
                         dsp_faust.setParam("/bopIt/startGame", 0f);
+                        Intent intent = new Intent(MainActivity.this, PlaybackPost.class);
+                        startActivity(intent);
                         return;
-                    } else {        //otherwise finish waiting for the rest of the wait time to be done
-
                     }
 
                     //pause for a fraction of a second to give things like the amplitude tracker and
@@ -260,21 +255,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             }
         });
 
-        playbackButt.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if(startGame == false){
-                        dsp_faust.setParam("/bopIt/startPlayback", 1f);
-                    }
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                        dsp_faust.setParam("/bopIt/startPlayback", 0f);
-                }
-                return false;
-            }
-        });
-
         resample.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -296,7 +276,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 //take us to the next activity, which will be a list of the most popular
                 //upvoted game recordings
                     Intent intent = new Intent(MainActivity.this, ViewServerActivity.class);
-                    Unirest.get("http://127.0.0.1:8080");
                     startActivity(intent);
                 } else if(event.getAction() == MotionEvent.ACTION_UP){
                     //probably do nothing

@@ -28,6 +28,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="html.eduwhermanhome.stanford.httpsccrma.musicalbopit.MainActivity" />
         </activity>
+        <activity
+            android:name=".PlaybackPost"
+            android:label="@string/title_activity_playback_post"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="html.eduwhermanhome.stanford.httpsccrma.musicalbopit.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
